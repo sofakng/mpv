@@ -36,6 +36,7 @@ git_revision=$(cat snapshot_version 2> /dev/null)
 test "$git_revision" || test ! -e .git || git_revision="$(git rev-parse --short HEAD)"
 test "$git_revision" && git_revision="git-$git_revision"
 version="$git_revision"
+seq_revision=`git rev-list --count HEAD`
 
 # releases extract the version number from the VERSION file
 releaseversion="$(cat VERSION 2> /dev/null)"
@@ -46,10 +47,11 @@ fi
 
 test "$version" || version=UNKNOWN
 
+REV_COUNT="#define REV_COUNT \"${seq_revision}\ \""
 VERSION="${version}${extra}"
 
 if test "$print" = yes ; then
-    echo "$VERSION"
+    echo "r$seq_revision $VERSION"
     exit 0
 fi
 
@@ -61,6 +63,7 @@ BUILDDATE="#define BUILDDATE \"$(date)\""
 if test "$NEW_REVISION" != "$OLD_REVISION"; then
     cat <<EOF > "$version_h"
 $NEW_REVISION
+$REV_COUNT
 $BUILDDATE
 EOF
 fi
